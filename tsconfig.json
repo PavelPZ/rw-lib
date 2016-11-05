@@ -1,0 +1,27 @@
+{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "target": "es5",
+    "module": "system",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "inlineSourceMap": true,
+    "inlineSources": true,
+    "declaration": true,
+    "declarationDir": "tsd",
+    "baseUrl": ".",
+    "paths": {
+      "rxjs/*": [ "jspm_packages/npm/rxjs@5.0.0-rc.1/*" ]
+    },
+    "lib": [
+      "dom",
+      "es6"
+    ],
+    "jsx": "react"
+  },
+
+  "exclude": [
+    "jspm_packages/",
+    "tsd/**/*"
+  ]
+}
