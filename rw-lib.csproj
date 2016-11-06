@@ -23,6 +23,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
+    <Content Include="glob\cs.js" />
+    <Content Include="glob\de.js" />
+    <Content Include="glob\en.js" />
     <Content Include="index.html" />
     <Content Include="jspm.browser.js" />
     <Content Include="jspm.config.js" />
@@ -41,8 +44,22 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="glob\all-locs.ts" />
+    <TypeScriptCompile Include="glob\formaters.ts" />
+    <TypeScriptCompile Include="glob\globalize.ts" />
     <TypeScriptCompile Include="index.ts" />
+    <TypeScriptCompile Include="lib\base64.ts" />
+    <TypeScriptCompile Include="lib\cammel-case.ts" />
+    <TypeScriptCompile Include="lib\common.ts" />
+    <TypeScriptCompile Include="lib\date2int.ts" />
+    <TypeScriptCompile Include="lib\random.ts" />
+    <TypeScriptCompile Include="lib\string2bytes.ts" />
+    <TypeScriptCompile Include="lib\cookie.ts" />
+    <TypeScriptCompile Include="lib\rjson.ts" />
+    <TypeScriptCompile Include="lib\unicode.ts" />
     <TypeScriptCompile Include="typings\classnames\classnames.d.ts" />
+    <TypeScriptCompile Include="typings\cldr.js\cldr.js.d.ts" />
+    <TypeScriptCompile Include="typings\globalize\globalize.d.ts" />
     <TypeScriptCompile Include="typings\react\react-dom.d.ts" />
     <TypeScriptCompile Include="typings\react\react.d.ts" />
     <TypeScriptCompile Include="typings\tsd.d.ts" />

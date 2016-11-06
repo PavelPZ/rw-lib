@@ -12,6 +12,12 @@
     },
     "react/react.d.ts": {
       "commit": "f080b63646be89a2466028ebdbaac80a7e0abc08"
+    },
+    "cldr.js/cldr.js.d.ts": {
+      "commit": "e7772769fab8c206449ce9673cac417370330aa9"
+    },
+    "globalize/globalize.d.ts": {
+      "commit": "e7772769fab8c206449ce9673cac417370330aa9"
     }
   }
 }

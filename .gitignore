@@ -254,3 +254,6 @@ paket-files/
 jspm_packages/
 typings/react/
 typings/classnames/
+*.js
+tsd/
+!glob/*.js
