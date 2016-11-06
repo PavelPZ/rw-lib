@@ -51,6 +51,7 @@
     <TypeScriptCompile Include="lib\base64.ts" />
     <TypeScriptCompile Include="lib\cammel-case.ts" />
     <TypeScriptCompile Include="lib\common.ts" />
+    <TypeScriptCompile Include="lib\crypt.ts" />
     <TypeScriptCompile Include="lib\date2int.ts" />
     <TypeScriptCompile Include="lib\random.ts" />
     <TypeScriptCompile Include="lib\string2bytes.ts" />

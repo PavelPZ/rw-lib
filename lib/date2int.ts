@@ -1,4 +1,5 @@
-﻿var Globalize: any;
+﻿import { globalize } from '../glob/globalize';
+
 //http://stackoverflow.com/questions/1877788/javascript-date-to-c-sharp-via-ajax
 var localOffset = new Date().getTimezoneOffset() * 60000;
 export function toUtcTime(dt: Date): Date { return new Date(dt.getTime() + localOffset); }
@@ -8,8 +9,8 @@ export function nowToInt(): number { return dateToInt(new Date()); } //milivteri
 export function nowToNum(): number { return dateToNum(new Date()); } //vteriny
 export function nowToDay(): number { return dayToInt(new Date()); } //dny
 
-export function formatDateLow(dt: Date): string { return Globalize.format(dt, 'd'); }
-export function formatTimeLow(dt: Date): string { return Globalize.format(dt, ', H:m:s'); }
+export function formatDateLow(dt: Date): string { return globalize.dateMedium(dt); }
+export function formatTimeLow(dt: Date): string { return globalize.timeMedium(dt); }
 
 //vteriny
 export function dateToNum(dt: Date): number { return Math.floor(dateToInt(dt) / 1000); }
@@ -21,7 +22,7 @@ export function formatDateTime(sec: number) { return formatDate(sec) + formatTim
 export function dateToInt(dt: Date): number { return dt.getTime(); }
 export function intToDate(num: number): Date { return new Date(num); }
 export function intToDateStr(num: number): string { return formatTimeLow(intToDate(num)); }
-export function intToDateStrLong(num: number): string { return Globalize.format(intToDate(num), 'D'); }
+export function intToDateStrLong(num: number): string { return globalize.dateLong(intToDate(num)); }
 
 //days
 export function dayToInt(dt: Date): number { return Math.floor((dateToInt(dt) + 1) / msecInDay); }

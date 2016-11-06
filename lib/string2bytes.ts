@@ -58,7 +58,7 @@ export function stringToUtf8ByteArray(str: string): number[] {
  * @param {Array.<number>} bytes UTF-8 byte array.
  * @return {string} 16-bit Unicode string.
  */
-export function utf8ByteArrayToString(bytes: number[]) {
+export function utf8ByteArrayToString(bytes: number[]):string {
   // TODO(user): Use native implementations if/when available
   var out = [], pos = 0, c = 0;
   while (pos < bytes.length) {

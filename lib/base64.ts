@@ -1,22 +1,56 @@
 import { byteArrayToString, stringToByteArray } from 'string2bytes';
 
-export function LMencodeString(bytes: number[] | Uint8Array): string {
+/**
+* Base64-encode a string.
+*
+* @param {string} input A string to encode.
+* @param {boolean=} opt_webSafe If true, we should use the
+*     alternative alphabet.
+* @return {string} The base64 encoded string.
+*/
+export function bytes2String(input: string | number[] | Uint8Array, opt_webSafe?: boolean): string {
   // Shortcut for Mozilla browsers that implement
   // a native base64 encoder in the form of "btoa/atob"
-  if (typeof (window.btoa) == 'function') {
-    return window.btoa(byteArrayToString(bytes));
+  if (typeof (window.btoa) === 'function' && !opt_webSafe) {
+    if (typeof (input) == 'string')
+      return window.btoa(input);
+    else
+      return window.btoa(byteArrayToString(input));
+  } else {
+    if (typeof (input) == 'string')
+      return encodeByteArray(stringToByteArray(input), opt_webSafe);
+    else
+      return encodeByteArray(input, opt_webSafe);
   }
-  return encodeByteArray(bytes, false);
 }
 
+
+/**
+* Base64-decode a string.
+*
+* @param {string} input to decode.
+* @param {boolean=} opt_webSafe True if we should use the
+*     alternative alphabet.
+* @return {string} string representing the decoded value.
+*/
+export function string2rawString(input: string, opt_webSafe?: boolean):string {
+  // Shortcut for Mozilla browsers that implement
+  // a native base64 encoder in the form of "btoa/atob"
+  if (typeof (window.atob) === 'function' && !opt_webSafe) {
+    return window.atob(input);
+  }
+  return byteArrayToString(decodeStringToByteArray(input, opt_webSafe));
+}
+
+
 //return byte array
-export function LMdecodeString(input: string): number[] {
+export function string2Bytes(input: string, opt_webSafe?: boolean): number[] {
   // Shortcut for Mozilla browsers that implement 
   // a native base64 encoder in the form of "btoa/atob"
-  if (typeof (window.atob) == 'function') {
+  if (typeof (window.atob) == 'function' && !opt_webSafe) {
     return stringToByteArray(window.atob(input));
   }
-  return decodeStringToByteArray(input, false);
+  return decodeStringToByteArray(input, opt_webSafe);
 }
 
 /**
@@ -100,7 +134,7 @@ typeof(goog.global.atob) == 'function';*/
 *     alternative alphabet.
 * @return {string} The base64 encoded string.
 */
-export function encodeByteArray(input: number[] | Uint8Array, opt_webSafe: boolean): string {
+function encodeByteArray(input: number[] | Uint8Array, opt_webSafe: boolean): string {
   //if (!goog.isArrayLike(input)) {
   //throw Error('encodeByteArray takes an array as a parameter');
   //}
@@ -140,41 +174,6 @@ export function encodeByteArray(input: number[] | Uint8Array, opt_webSafe: boole
   return output.join('');
 }
 
-/**
-* Base64-encode a string.
-*
-* @param {string} input A string to encode.
-* @param {boolean=} opt_webSafe If true, we should use the
-*     alternative alphabet.
-* @return {string} The base64 encoded string.
-*/
-function encodeString(input: string, opt_webSafe: boolean) {
-  // Shortcut for Mozilla browsers that implement
-  // a native base64 encoder in the form of "btoa/atob"
-  if (typeof (window.btoa) === 'function' && !opt_webSafe) {
-    return window.btoa(input);
-  }
-  return encodeByteArray(stringToByteArray(input), opt_webSafe);
-}
-
-
-/**
-* Base64-decode a string.
-*
-* @param {string} input to decode.
-* @param {boolean=} opt_webSafe True if we should use the
-*     alternative alphabet.
-* @return {string} string representing the decoded value.
-*/
-function decodeString(input: string, opt_webSafe: boolean) {
-  // Shortcut for Mozilla browsers that implement
-  // a native base64 encoder in the form of "btoa/atob"
-  if (typeof (window.atob) === 'function' && !opt_webSafe) {
-    return window.atob(input);
-  }
-  return byteArrayToString(decodeStringToByteArray(input, opt_webSafe));
-}
-
 
 /**
 * Base64-decode a string.
@@ -184,7 +183,7 @@ function decodeString(input: string, opt_webSafe: boolean) {
 *     alternative alphabet.
 * @return {Array} bytes representing the decoded value.
 */
-export function decodeStringToByteArray(input: string, opt_webSafe: boolean): number[] {
+function decodeStringToByteArray(input: string, opt_webSafe: boolean): number[] {
   init_();
 
   var charToByteMap = opt_webSafe ?
