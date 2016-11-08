@@ -1,49 +1,32 @@
-﻿import { stringToByteArray, byteArrayToString, stringToUtf8ByteArray, utf8ByteArrayToString } from './string2bytes';
-import { bytes2String as base64_bytes2String, string2Bytes as base64_string2Bytes } from './base64';
+﻿import { stringToByteArray, byteArrayToString, stringToUtf8ByteArray, utf8ByteArrayToString, bytesToHex, hexToBytes } from './string2bytes';
+import * as base64 from './base64';
 
-function Int64ToByte(val: number): number {
-  return val & 0xFF;
-};
-function Int64ToUShort(val: number): number {
-  return val & 0xFFFF;
-};
-
-export function bytesToHex(input): string {
-  if (typeof input == "string") input = stringToByteArray(input);
-  return (input as Array<number>).map (numByte => {
-    let hexByte = numByte.toString(16);
-    return hexByte.length > 1 ? hexByte : '0' + hexByte;
-  }).join('');
-}
-
-export function hexToBytes(hexString: string): number[] {
-  let arr = [];
-  for (let i = 0; i < hexString.length; i += 2) {
-    arr.push(parseInt(hexString.substring(i, i + 2), 16));
-  }
-  return arr;
-};
-
-let encryptKey = 18475;
-
-export function encryptBytes(data: number[]): number[] {
+export function encryptBytes(data: Array<number>): Array<number> {
   return data ? encryptLow(data, 0, data.length, encryptKey) : null;
 }
-export function decryptBytes(data: number[]): number[] {
+export function decryptBytes(data: Array<number>): Array<number> {
   return data ? decryptLow(data, 0, data.length, encryptKey) : null;
 }
 
-export function decryptObj<T>(data: string): T {
-  return data ? JSON.parse(decryptStr(data)) : null;
+export function decryptBase64(base64Str: string): string {
+  return base64Str ? utf8ByteArrayToString(decryptBytes(base64.base642Bytes(base64Str))) : null;
+}
+export function encryptBase64(str: string): string {
+  return str ? base64.bytes2Base64(encryptBytes(stringToUtf8ByteArray(str))) : null;
+}
+
+export function decryptObj<T>(base64: string): T {
+  return base64 ? JSON.parse(decryptBase64(base64)) : null;
 }
 export function encryptObj(obj: Object): string {
-  return obj ? encryptStr(JSON.stringify(obj)) : null;
+  return obj ? encryptBase64(JSON.stringify(obj)) : null;
 }
-export function decryptStr(base64: string): string {
-  return base64 ? utf8ByteArrayToString(decryptBytes(base64_string2Bytes(base64))) : null;
+
+export function decryptHex(hex: string): string {
+  return hex ? utf8ByteArrayToString(decryptBytes(hexToBytes(hex))) : null;
 }
-export function encryptStr(str: string): string {
-  return str ? base64_bytes2String(encryptBytes(stringToUtf8ByteArray(str))) : null;
+export function encryptHex(str: string): string {
+  return str ? bytesToHex(encryptBytes(stringToUtf8ByteArray(str))) : null;
 }
 
 //??????
@@ -54,8 +37,9 @@ export function encryptStr(str: string): string {
 //  return str ? utf8ByteArrayToString(base64_string2Bytes(str)) : null;
 //}
 
+let encryptKey = 18475;
 
-function encryptLow(data: number[], start: number, len: number, key: number): number[] {
+function encryptLow(data: Array<number>, start: number, len: number, key: number): Array<number> {
   for (let i = start; i < start + len; i++) {
     data[i] = Int64ToByte(data[i] ^ (key >> 8));
     key = Int64ToUShort((data[i] + key) * 52845 + 22719);
@@ -63,7 +47,7 @@ function encryptLow(data: number[], start: number, len: number, key: number): nu
   return data;
 }
 
-function decryptLow(data: number[], start: number, len: number, key: number): number[] {
+function decryptLow(data: Array<number>, start: number, len: number, key: number): Array<number> {
   let old;
   for (let i = 0; i < data.length; i++) {
     old = data[i];
@@ -72,3 +56,11 @@ function decryptLow(data: number[], start: number, len: number, key: number): nu
   }
   return data;
 }
+
+function Int64ToByte(val: number): number {
+  return val & 0xFF;
+};
+function Int64ToUShort(val: number): number {
+  return val & 0xFFFF;
+};
+

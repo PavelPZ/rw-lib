@@ -1,6 +1,6 @@
-function isArray(obj: Object): boolean {
-  return obj.toString() === "[object Array]";
-}
+//function isArray(obj: Object): boolean {
+//  return obj.toString() === "[object Array]";
+//}
 /**
  * Turns a string into an array of bytes; a "byte" being a JS number in the
  * range 0-255.
@@ -78,4 +78,19 @@ export function utf8ByteArrayToString(bytes: number[]):string {
   return out.join('');
 }
 
+export function bytesToHex(input: string | Array<number>): string {
+  if (typeof input == "string") input = stringToByteArray(input);
+  return (input as Array<number>).map(numByte => {
+    let hexByte = numByte.toString(16);
+    return hexByte.length > 1 ? hexByte : '0' + hexByte;
+  }).join('');
+}
+
+export function hexToBytes(hexString: string): Array<number> {
+  let arr = [];
+  for (let i = 0; i < hexString.length; i += 2) {
+    arr.push(parseInt(hexString.substring(i, i + 2), 16));
+  }
+  return arr;
+};
 

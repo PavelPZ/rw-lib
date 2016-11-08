@@ -6,16 +6,16 @@
     "dependencies": {
       "classnames": "npm:classnames@^2.2.5",
       "core-js": "npm:core-js@^2.4.1",
-      "globalize": "npm:globalize@^1.1.1",
+      "globalize": "npm:globalize@^1.1.2",
       "react-dom": "npm:react-dom@^15.3.2",
-      "rxjs": "npm:rxjs@^5.0.0-rc.1"
+      "rxjs": "npm:rxjs@^5.0.0-rc.2"
     },
     "peerDependencies": {
       "assert": "npm:jspm-nodelibs-assert@^0.2.0",
       "bcrypt-pbkdf": "npm:bcrypt-pbkdf@^1.0.0",
       "buffer": "npm:jspm-nodelibs-buffer@^0.2.0",
       "child_process": "npm:jspm-nodelibs-child_process@^0.2.0",
-      "cldr-data": "npm:cldr-data",
+      "cldr-data": "npm:cldr-data@^30.0.1",
       "constants": "npm:jspm-nodelibs-constants@^0.2.0",
       "crypto": "npm:jspm-nodelibs-crypto@^0.2.0",
       "dgram": "npm:jspm-nodelibs-dgram@^0.2.0",
@@ -67,4 +67,5 @@
       }
     }
   }
-}
+}
+

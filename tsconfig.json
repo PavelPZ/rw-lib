@@ -11,7 +11,7 @@
     "declarationDir": "tsd",
     "baseUrl": ".",
     "paths": {
-      "rxjs/*": [ "jspm_packages/npm/rxjs@5.0.0-rc.1/*" ]
+      "rxjs/*": [ "jspm_packages/npm/rxjs@5.0.0-rc.2/*" ]
     },
     "lib": [
       "dom",

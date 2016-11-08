@@ -8,7 +8,7 @@ import { byteArrayToString, stringToByteArray } from 'string2bytes';
 *     alternative alphabet.
 * @return {string} The base64 encoded string.
 */
-export function bytes2String(input: string | number[] | Uint8Array, opt_webSafe?: boolean): string {
+export function bytes2Base64(input: string | number[] | Uint8Array, opt_webSafe?: boolean): string {
   // Shortcut for Mozilla browsers that implement
   // a native base64 encoder in the form of "btoa/atob"
   if (typeof (window.btoa) === 'function' && !opt_webSafe) {
@@ -33,7 +33,7 @@ export function bytes2String(input: string | number[] | Uint8Array, opt_webSafe?
 *     alternative alphabet.
 * @return {string} string representing the decoded value.
 */
-export function string2rawString(input: string, opt_webSafe?: boolean):string {
+export function base642rawString(input: string, opt_webSafe?: boolean):string {
   // Shortcut for Mozilla browsers that implement
   // a native base64 encoder in the form of "btoa/atob"
   if (typeof (window.atob) === 'function' && !opt_webSafe) {
@@ -44,7 +44,7 @@ export function string2rawString(input: string, opt_webSafe?: boolean):string {
 
 
 //return byte array
-export function string2Bytes(input: string, opt_webSafe?: boolean): number[] {
+export function base642Bytes(input: string, opt_webSafe?: boolean): number[] {
   // Shortcut for Mozilla browsers that implement 
   // a native base64 encoder in the form of "btoa/atob"
   if (typeof (window.atob) == 'function' && !opt_webSafe) {

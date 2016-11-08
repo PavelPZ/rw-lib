@@ -21,7 +21,7 @@ SystemJS.config({
     "ecc-jsbn": "npm:ecc-jsbn@0.1.1",
     "events": "npm:jspm-nodelibs-events@0.2.0",
     "fs": "npm:jspm-nodelibs-fs@0.2.0",
-    "globalize": "npm:globalize@1.1.1",
+    "globalize": "npm:globalize@1.1.2",
     "http": "npm:jspm-nodelibs-http@0.2.0",
     "https": "npm:jspm-nodelibs-https@0.2.1",
     "jodid25519": "npm:jodid25519@1.0.2",
@@ -33,7 +33,7 @@ SystemJS.config({
     "querystring": "npm:jspm-nodelibs-querystring@0.2.0",
     "react": "npm:react@15.3.2",
     "react-dom": "npm:react-dom@15.3.2",
-    "rxjs": "npm:rxjs@5.0.0-rc.1",
+    "rxjs": "npm:rxjs@5.0.0-rc.2",
     "stream": "npm:jspm-nodelibs-stream@0.2.0",
     "string_decoder": "npm:jspm-nodelibs-string_decoder@0.2.0",
     "tls": "npm:jspm-nodelibs-tls@0.2.0",
@@ -45,11 +45,6 @@ SystemJS.config({
     "zlib": "npm:jspm-nodelibs-zlib@0.2.0"
   },
   packages: {
-    "npm:rxjs@5.0.0-rc.1": {
-      "map": {
-        "symbol-observable": "npm:symbol-observable@1.0.4"
-      }
-    },
     "npm:react@15.3.2": {
       "map": {
         "loose-envify": "npm:loose-envify@1.3.0",
@@ -67,7 +62,7 @@ SystemJS.config({
         "core-js": "npm:core-js@1.2.7",
         "loose-envify": "npm:loose-envify@1.3.0",
         "object-assign": "npm:object-assign@4.1.0",
-        "ua-parser-js": "npm:ua-parser-js@0.7.10",
+        "ua-parser-js": "npm:ua-parser-js@0.7.11",
         "promise": "npm:promise@7.1.1",
         "isomorphic-fetch": "npm:isomorphic-fetch@2.2.1",
         "immutable": "npm:immutable@3.8.1"
@@ -300,7 +295,7 @@ SystemJS.config({
         "create-hash": "npm:create-hash@1.1.2",
         "evp_bytestokey": "npm:evp_bytestokey@1.0.0",
         "pbkdf2": "npm:pbkdf2@3.0.9",
-        "asn1.js": "npm:asn1.js@4.8.1"
+        "asn1.js": "npm:asn1.js@4.9.0"
       }
     },
     "npm:miller-rabin@4.0.0": {
@@ -318,13 +313,6 @@ SystemJS.config({
         "randombytes": "npm:randombytes@2.0.3"
       }
     },
-    "npm:asn1.js@4.8.1": {
-      "map": {
-        "bn.js": "npm:bn.js@4.11.6",
-        "inherits": "npm:inherits@2.0.3",
-        "minimalistic-assert": "npm:minimalistic-assert@1.0.0"
-      }
-    },
     "npm:hash.js@1.0.3": {
       "map": {
         "inherits": "npm:inherits@2.0.3"
@@ -340,11 +328,6 @@ SystemJS.config({
       "map": {
         "glob": "npm:glob@5.0.15",
         "cldr-data-downloader": "npm:cldr-data-downloader@0.2.5"
-      }
-    },
-    "npm:globalize@1.1.1": {
-      "map": {
-        "cldrjs": "npm:cldrjs@0.4.4"
       }
     },
     "npm:glob@5.0.15": {
@@ -630,6 +613,23 @@ SystemJS.config({
     "npm:strip-ansi@3.0.1": {
       "map": {
         "ansi-regex": "npm:ansi-regex@2.0.0"
+      }
+    },
+    "npm:rxjs@5.0.0-rc.2": {
+      "map": {
+        "symbol-observable": "npm:symbol-observable@1.0.4"
+      }
+    },
+    "npm:globalize@1.1.2": {
+      "map": {
+        "cldrjs": "npm:cldrjs@0.4.7"
+      }
+    },
+    "npm:asn1.js@4.9.0": {
+      "map": {
+        "bn.js": "npm:bn.js@4.11.6",
+        "inherits": "npm:inherits@2.0.3",
+        "minimalistic-assert": "npm:minimalistic-assert@1.0.0"
       }
     }
   }
