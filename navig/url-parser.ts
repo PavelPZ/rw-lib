@@ -1,17 +1,8 @@
 ﻿import { Exception } from '../lib/common';
+import { IRouteNode } from 'router';
 
 const routeHookDefaultName = 'child';
 const $isHashRouter = false;
-
-interface IRouteNode {
-  handlerId?: string;
-  //hookId?: string; //nazev property v hook.parent Store, obsahujici RouteHookDispatcher. !hookId => routeDefaultPropName property
-  [props: string]: any;
-  par?: {}; //<storeId>.routeAction(par, hookId)
-  child?: IRouteNode; //difotni child route hook
-  childs?: { [hookId: string]: IRouteNode; }; //...other
-  //... dalsi, named route hook
-}
 
 function decodeUrlLow(url: string): IRouteNode {
   if (!$isHashRouter) url = url.split('#')[0];
@@ -96,15 +87,17 @@ function encodeUrlLow(res: Array<string>, st: IRouteNode, parentPropName?: strin
 function clearSlashes(path: string): string { return path.replace(/\/$/, '').replace(/^[\#\/\?]?/, ''); }
 
 const routeParIgnores = ['child', 'childs', 'handlerId'];
-function getChildsPropNames(st: IRouteNode): Array<string> {
+
+function getChildsPropNames(st: { [hookId: string]: IRouteNode; }): Array<string> {
   let props = [];
   for (let p in st) props.push(p);
   return props.sort();
 }
 
 export function test() {
+  //url = "hand1;a=%24%3B%5C%2F%26%3A;b=2/hand2;c=1;d=2$//ch1-hand3;e=1;f=2/hand31;c=1;d=2$//ch1-hand32;e=1;f=2$//ch2-hand33;g=1;h=2$/$//ch2-hand4;g=1;h=2"
   var url = encodeUrl({
-    handlerId: 'hand1', a: 1, b: 2,
+    handlerId: 'hand1', a: '$;\\/&:', b: 2,
     child: {
       handlerId: 'hand2', c: 1, d: 2
     },
@@ -130,4 +123,7 @@ export function test() {
   var dump = JSON.stringify(decodeUrlLow(url), null, 2);
   url = encodeUrl(decodeUrlLow(url));
   dump = JSON.stringify(decodeUrlLow(url), null, 2);
+  debugger;
 }
+
+//test();
