@@ -56,31 +56,3 @@ public static class crypt {
     }
   }
 }
-
-//public static byte[] Decrypt(Stream str, ushort key) {
-//  byte[] data = StreamToByte(str);
-//  Decrypt(ref data, key);
-//  return data;
-//}
-//public static string Encrypt(string str, ushort key = encryptKey) {
-//  if (str == null) return null;
-//  byte[] data = Encoding.Unicode.GetBytes(str);
-//  Encrypt(ref data, key);
-//  return Convert.ToBase64String(data);
-//}
-//public static string Decrypt(string str, ushort key = encryptKey) {
-//  if (str == null) return null;
-//  byte[] data = Convert.FromBase64String(str);
-//  Decrypt(ref data, key);
-//  return Encoding.Unicode.GetString(data);
-//}
-//public static string EncryptHex(string str, ushort key = encryptKey) {
-//  byte[] data = UTF8Encode(str);
-//  Encrypt(ref data, key);
-//  return BytesToString(data);
-//}
-//public static string DecryptHex(string str, ushort key = encryptKey) {
-//  byte[] data = StringToBytes(str);
-//  Decrypt(ref data, key);
-//  return UTF8Decode(data);
-//}

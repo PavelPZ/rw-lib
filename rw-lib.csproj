@@ -59,6 +59,11 @@
     <TypeScriptCompile Include="lib\cookie.ts" />
     <TypeScriptCompile Include="lib\rjson.ts" />
     <TypeScriptCompile Include="lib\unicode.ts" />
+    <TypeScriptCompile Include="navig\router.tsx" />
+    <TypeScriptCompile Include="navig\router-lib.ts" />
+    <TypeScriptCompile Include="navig\sitemap-router.tsx" />
+    <TypeScriptCompile Include="navig\sitemap.ts" />
+    <TypeScriptCompile Include="navig\url-parser.ts" />
     <TypeScriptCompile Include="typings\classnames\classnames.d.ts" />
     <TypeScriptCompile Include="typings\cldr.js\cldr.js.d.ts" />
     <TypeScriptCompile Include="typings\globalize\globalize.d.ts" />
@@ -78,6 +83,7 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>

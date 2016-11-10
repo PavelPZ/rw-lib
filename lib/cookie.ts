@@ -1,3 +1,36 @@
+export function read(id: string, def: string = ""): string {
+  return getCookie(id, def);
+}
+export function write(name: string, value: string, persist: boolean = false): void {
+  //_.each(allSubDomains, s => gCookie.setCookie(name, '', -1, undefined, s + '.' + LowUtils.cookieDomain()));
+  setCookie(name, value, persist ? 100000000 : undefined, "/", cookieDomain());
+}
+export function remove(id: string): void {
+  removeCookie(id, "/", cookieDomain());
+}
+
+export function readObj<T>(id: string): T {
+  var cook = getCookie(id, null); if (!cook) return null;
+  return JSON.parse(cook);
+}
+
+export function writeObj(id: string, obj: Object, persist: boolean = false) {
+  if (!obj) remove(id); else write(id, JSON.stringify(id), persist);
+}
+
+const wrongSecLev = /^(com|net|mil|org|gov|edu|int)$/;
+function cookieDomain() {
+  var parts = window.location.host.toLowerCase().split('.');
+  var len = parts.length;
+  if (len < 3) return undefined;
+  if (parts[len - 1].length <= 2 || parts[len - 1].match(wrongSecLev)) {
+    if (len < 4) return undefined;
+    return parts[len - 3] + "." + parts[len - 2] + "." + parts[len - 1];
+  } else
+    return parts[len - 2] + "." + parts[len - 1];
+}
+
+
 // Copyright 2006 The Closure Library Authors. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -187,7 +220,7 @@ export function getCookie(name: string, opt_default: string = ""): string {
  *     null (i.e. cookie at full request host name).
  * @return {boolean} Whether the cookie existed before it was removed.
  */
-export function remove(name: string, opt_path: string = '', opt_domain: string = '') {
+export function removeCookie(name: string, opt_path: string = '', opt_domain: string = '') {
   var rv = containsKey(name);
   setCookie(name, '', 0, opt_path, opt_domain);
   return rv;
@@ -270,7 +303,7 @@ function containsValue(value) {
 function clear() {
   var keys = getKeyValues_().keys;
   for (var i = keys.length - 1; i >= 0; i--) {
-    remove(keys[i]);
+    removeCookie(keys[i]);
   }
 };
 
