@@ -1,10 +1,6 @@
 ﻿import * as React from 'react';
 import { Exception } from '../lib/common';
 
-export interface IRouteNode {
-}
-
-
 export namespace router {
 
   //difotni route pro pripad, ze je URL prazdna

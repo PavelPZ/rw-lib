@@ -18,9 +18,25 @@ import * as ReactDOM from 'react-dom';
 import { Exception } from '../lib/common';
 
 //pouzit route na "from" hook nebo na rootHook hook.
-export function dispatchRoute<T extends IRouteNode>(route: T, from?: RouteHook) {
-  if (!from) from = rootHook;
-  rootHook.dispatchRoute(route);
+//export function dispatchRoute<T extends IRouteNode>(route: T, from?: RouteHook) {
+//  if (!from) from = rootHook;
+//  rootHook.dispatchRoute(route);
+//}
+
+export let rootHook: RouteHook; //root hook
+
+//start s inicialni route
+export function initRouteDispatcher<T extends IRouteNode>(startRoute: () => T) {
+  getStartRoute = startRoute;
+  rootHook = ReactDOM.render(<RouteHook hookId={null} initStatus={getStartRoute()} />, document.getElementById('content')) as RouteHook;
+}
+export let getStartRoute: () => IRouteNode;
+
+export function routeReplaceStringProps(route: IRouteNode): IRouteNode {
+  TRouteHandler.find(route.handlerId).normalizeStringProps(route);
+  if (route.child) routeReplaceStringProps(route.child);
+  if (route.childs) for (var p in route.childs) routeReplaceStringProps(route.childs[p]);
+  return route;
 }
 
 //dekodovana URL adresa
@@ -39,8 +55,9 @@ export interface IRouteNode {
 //pomuze pak s RouteHook.render apod.
 export abstract class TRouteHandler {
   constructor(public id: string) { }
-  abstract eq(node1: IRouteNode, node2: IRouteNode): boolean;
+  abstract eq(node1: IRouteNode, node2: IRouteNode): boolean; 
   abstract getComponentClass(node: IRouteNode): React.ComponentClass<IRouteNode>;
+  abstract normalizeStringProps(node: IRouteNode);
   static register(handler: TRouteHandler) { if (TRouteHandler.handlers[handler.id]) throw new Exception(handler.id); TRouteHandler.handlers[handler.id] = handler; }
   static find(id: string): TRouteHandler { return TRouteHandler.handlers[id]; }
   static handlers: { [id: string]: TRouteHandler; } = {};
@@ -94,9 +111,6 @@ export class RouteHook extends React.Component<IHookPar, IRouteNode & React.Comp
 
 export abstract class RouteComponent<TProp extends IRouteNode> extends React.Component<TProp, {}> { }
 
-//start s inicialni route
-export function initRouteDispatcher<T extends IRouteNode>(st: T) {
-  rootHook = ReactDOM.render(<RouteHook hookId={null} initStatus={st} />, document.getElementById('content')) as RouteHook;
-}
-let rootHook: RouteHook; //root hook
+
+
 

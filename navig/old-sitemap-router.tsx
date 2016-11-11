@@ -1,7 +1,7 @@
 ﻿import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { router } from 'router-lib';
-import { site } from 'sitemap';
+import { router } from 'old-router-lib';
+import { site } from 'old-sitemap';
 import { Exception, TCallback } from '../lib/common';
 
 namespace sitemapRouter {

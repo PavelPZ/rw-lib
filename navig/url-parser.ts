@@ -8,6 +8,30 @@
 import { Exception } from '../lib/common';
 import { IRouteNode } from 'dispatcher';
 
+export function encodeFullUrl(st: IRouteNode): string {
+  let urlStr = st ? encodeUrl(st) : null;
+  //return $basicUrl + (urlStr ? ($isHashRouter ? '#' : '/') + urlStr : '');
+  return $basicUrl + (urlStr ? ($isHashRouter ? '#' : '?') + urlStr : '');
+}
+
+export function decodeFullUrl(url?: string): IRouteNode {
+  return decodeUrl(decodeUrlPart(url));
+}
+
+function decodeUrlPart(url?: string): string {
+  if (!url) url = window.location.href;
+  if (!url.toLowerCase().startsWith($basicUrl)) throw new Exception(`location.href does not start with ${$basicUrl}`);
+  return clearSlashes(url.substr($basicUrl.length));
+}
+
+function decodeUrl(url?: string): IRouteNode {
+  if (!url) return null;
+  return decodeUrlLow(url);
+}
+
+var $basicUrl = getBasicUrl(window.location.href); //cast URL pred route paramatter
+function getBasicUrl(startUrl: string): string { let idx = startUrl.toLowerCase().indexOf('.html'); return idx >= 0 ? startUrl.substr(0, idx + 5) : startUrl; }
+
 const routeHookDefaultName = 'child';
 const $isHashRouter = false;
 
@@ -82,7 +106,7 @@ function encodeUrl(st: IRouteNode): string {
 function encodeUrlLow(res: Array<string>, st: IRouteNode, parentPropName?: string) {
   res.push((parentPropName ? parentPropName + '-' : '') + (st.handlerId ? st.handlerId : ''));
   let props = [];
-  for (let p in st) if (routeParIgnores.indexOf(p) < 0) props.push(p);
+  for (let p in st) if (!p.startsWith('$') && routeParIgnores.indexOf(p) < 0) props.push(p);
   props.sort().forEach(p => res.push(`;${p}=${encodeURIComponent(st[p])}`));
   if (st.child) { res.push('/'); encodeUrlLow(res, st.child, null); res.push('$/'); }
   if (st.childs) {

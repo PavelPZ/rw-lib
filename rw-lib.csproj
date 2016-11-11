@@ -45,6 +45,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <TypeScriptCompile Include="glob\all-langs.ts" />
     <TypeScriptCompile Include="glob\all-locs.ts" />
     <TypeScriptCompile Include="glob\formaters.ts" />
     <TypeScriptCompile Include="glob\globalize.ts" />
@@ -60,9 +61,10 @@
     <TypeScriptCompile Include="lib\rjson.ts" />
     <TypeScriptCompile Include="lib\unicode.ts" />
     <TypeScriptCompile Include="navig\dispatcher.tsx" />
-    <TypeScriptCompile Include="navig\router-lib.ts" />
-    <TypeScriptCompile Include="navig\sitemap-router.tsx" />
-    <TypeScriptCompile Include="navig\sitemap.ts" />
+    <TypeScriptCompile Include="navig\old-router-lib.ts" />
+    <TypeScriptCompile Include="navig\router.ts" />
+    <TypeScriptCompile Include="navig\old-sitemap-router.tsx" />
+    <TypeScriptCompile Include="navig\old-sitemap.ts" />
     <TypeScriptCompile Include="navig\url-parser.ts" />
     <TypeScriptCompile Include="typings\classnames\classnames.d.ts" />
     <TypeScriptCompile Include="typings\cldr.js\cldr.js.d.ts" />
