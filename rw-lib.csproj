@@ -59,7 +59,7 @@
     <TypeScriptCompile Include="lib\cookie.ts" />
     <TypeScriptCompile Include="lib\rjson.ts" />
     <TypeScriptCompile Include="lib\unicode.ts" />
-    <TypeScriptCompile Include="navig\router.tsx" />
+    <TypeScriptCompile Include="navig\dispatcher.tsx" />
     <TypeScriptCompile Include="navig\router-lib.ts" />
     <TypeScriptCompile Include="navig\sitemap-router.tsx" />
     <TypeScriptCompile Include="navig\sitemap.ts" />

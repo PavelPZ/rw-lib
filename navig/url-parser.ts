@@ -1,11 +1,19 @@
-﻿import { Exception } from '../lib/common';
-import { IRouteNode } from 'router';
+﻿//Provadi konverzi IRouteNode tree do stringu a naopak.
+//url je napr. "hand1;a=1;b=2/hand2;c=1;d=2$//ch1-hand3;e=1;f=2/hand31;c=1;d=2$//ch1-hand32;e=1;f=2$//ch2-hand33;g=1;h=2$/$//ch2-hand4;g=1;h=2"
+//url koduje stromovou strukturu pomoci /...$/ zavorek
+//v prikladu:
+// - hand1 je RouteHandler.id, nasledovan je parametry route, tj.a = 1; b = 2. Zanoruje se do parent IRouteNode.child
+// - ch1-hand3:  hand3 je RouteHandler.id, parent IRouteNode.childs['ch1'] urcuje child IRouteNode
+
+import { Exception } from '../lib/common';
+import { IRouteNode } from 'dispatcher';
 
 const routeHookDefaultName = 'child';
 const $isHashRouter = false;
 
 function decodeUrlLow(url: string): IRouteNode {
-  if (!$isHashRouter) url = url.split('#')[0];
+  if (!$isHashRouter) url = url.split('#')[0]; //odrizni # pro not hash route
+  //nahrad /...$/ zavorky by {}
   url = '{' + url.replace(/\$\//g, '}').replace(/\//g, '{');
   let stack: Array<IDecodeStack> = []; let i = 0; let ch: string; let res: IDecodeStack = null;
   let parseRoute = (endIdx: number, st: IDecodeStack) => {
@@ -28,13 +36,13 @@ function decodeUrlLow(url: string): IRouteNode {
       ch = url.charAt(i); i++;
     }
     switch (ch) {
-      case '{':
+      case '{': //zacatek zanoreni
         if (stack.length == 0) { res = { openIdx: i }; stack.push(res); break; } //root
         let last = stack[stack.length - 1];
         if (!last.route) parseRoute(i, last); //zpracuj sekvenci mezi {xxxx{
         stack.push({ openIdx: i }); //zacni novy stack
         break;
-      case '}':
+      case '}': //konec zanoreni
         if (stack.length == 0) break;
         let last2 = stack[stack.length - 1];
         if (!last2.route) parseRoute(i, last2); //zpracuj sekvenci mezi {xxxx}, xxx je bez { i }
@@ -56,12 +64,14 @@ function decodeUrlLow(url: string): IRouteNode {
   return res.route;
 }
 
+//pomocne dato pro decodeUrlLow
 interface IDecodeStack {
-  openIdx: number;
-  route?: IRouteNode;
+  openIdx: number; //pozice zacatku parametru IRouteNode
+  route?: IRouteNode; //
   hookId?: string;
 }
 
+//prevod IRouteNode na string
 function encodeUrl(st: IRouteNode): string {
   let res: Array<string> = [];
   encodeUrlLow(res, st, null);
@@ -95,7 +105,6 @@ function getChildsPropNames(st: { [hookId: string]: IRouteNode; }): Array<string
 }
 
 export function test() {
-  //url = "hand1;a=%24%3B%5C%2F%26%3A;b=2/hand2;c=1;d=2$//ch1-hand3;e=1;f=2/hand31;c=1;d=2$//ch1-hand32;e=1;f=2$//ch2-hand33;g=1;h=2$/$//ch2-hand4;g=1;h=2"
   var url = encodeUrl({
     handlerId: 'hand1', a: '$;\\/&:', b: 2,
     child: {
