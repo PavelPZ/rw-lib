@@ -60,6 +60,9 @@
     <TypeScriptCompile Include="lib\cookie.ts" />
     <TypeScriptCompile Include="lib\rjson.ts" />
     <TypeScriptCompile Include="lib\unicode.ts" />
+    <TypeScriptCompile Include="login\client\config.ts" />
+    <TypeScriptCompile Include="login\client\index.ts" />
+    <TypeScriptCompile Include="login\common.ts" />
     <TypeScriptCompile Include="navig\dispatcher.tsx" />
     <TypeScriptCompile Include="navig\old-router-lib.ts" />
     <TypeScriptCompile Include="navig\router.ts" />
@@ -85,7 +88,9 @@
       <Private>True</Private>
     </Reference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="login\server\" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>

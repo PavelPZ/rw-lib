@@ -15,7 +15,7 @@
 
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Exception } from '../lib/common';
+import { Exception, ELoginNeededException } from '../lib/common';
 
 //pouzit route na "from" hook nebo na rootHook hook.
 //export function dispatchRoute<T extends IRouteNode>(route: T, from?: RouteHook) {
@@ -26,7 +26,8 @@ import { Exception } from '../lib/common';
 export let rootHook: RouteHook; //root hook
 
 //start s inicialni route
-export function initRouteDispatcher<T extends IRouteNode>(startRoute: () => T) {
+export function init<T extends IRouteNode>(startRoute: () => T) {
+  if (!startRoute) return;
   getStartRoute = startRoute;
   rootHook = ReactDOM.render(<RouteHook hookId={null} initStatus={getStartRoute()} />, document.getElementById('content')) as RouteHook;
 }
@@ -58,6 +59,7 @@ export abstract class TRouteHandler {
   abstract eq(node1: IRouteNode, node2: IRouteNode): boolean; 
   abstract getComponentClass(node: IRouteNode): React.ComponentClass<IRouteNode>;
   abstract normalizeStringProps(node: IRouteNode);
+  loginNeeded(node: IRouteNode): boolean { return false; }
   static register(handler: TRouteHandler) { if (TRouteHandler.handlers[handler.id]) throw new Exception(handler.id); TRouteHandler.handlers[handler.id] = handler; }
   static find(id: string): TRouteHandler { return TRouteHandler.handlers[id]; }
   static handlers: { [id: string]: TRouteHandler; } = {};
@@ -101,6 +103,7 @@ export class RouteHook extends React.Component<IHookPar, IRouteNode & React.Comp
   parent: RouteHook; //jsem zanoren pod jinym RouteHook
   render(): JSX.Element {
     if (!this.state) return null;
+    if (TRouteHandler.find(this.state.handlerId).loginNeeded(this.state)) throw new ELoginNeededException();
     this.state.$myHook = this;
     return React.createElement(TRouteHandler.find(this.state.handlerId).getComponentClass(this.state), this.state);
   }
