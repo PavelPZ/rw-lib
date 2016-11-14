@@ -6,6 +6,9 @@ export function init() {
   for (var p in config) if (webConfig[p]) (config[p] as IClientInfo).client_id = (webConfig[p] as IClientInfo).client_id; else delete config[p];
 }
 
+export function callLogin() {
+}
+
 //see D:\LMCom\rew\TheWeb\wwwroot\Common\lib\oauth.ts
 let config: IClientInfos = {
   facebook: {

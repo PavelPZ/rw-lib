@@ -1,119 +1,129 @@
-﻿//***************
-// pouzije dekodovany IRouteNode tree k aktualizaci React DOM
+﻿import { Exception, loginHook } from '../lib/common';
+import { IRouteNode, RouteHook, TRouteHandler, rootHook, TRouteComponent, trace } from './objects';
+
+//***************
+// pouzije dekodovany IRouteNode-tree k aktualizaci component-tree (tj. React componet tree, composed form RouteHook, RouteComponent etc.)
 // RouteHook je placeholder, ktery renderuje komponentu (za pomoci IRouteNode a RouteHandler)
 // renderuji se pouze ty RouteHook, jejichz IRouteNode se zmenil
+// vse de deje v dispatchRoute, vcetne:
+// - asyncronniho vytvoreni RouteComponent v RouteHandler.createComponent
+// - asyncronniho unmount stavajicich nahrazenych komponent
 
-// Vice
-/*
-- URL se v url-parser dekoduje do IRouteNode tree.
-- IRouteNode se dispatchuje do RouteHook
-- RouteHook budto provede render (pokud je "jeho" state odlisny od IRouteNode) nebo provede rekurzivni dispatch na child IRouteNode (uschovane v IRouteNode.child nebo v IRouteNode.childs)
-- RouteHook vyuzije ke sve cinnosti RouteHandler
-  - k zjisteni komponenty, co se do RouteHook vykresli (TRouteHendler.getComponentClass)
-  - k porovnani, zdali se RouteHook state zmenil nebo ne (TRouteHendler.eq)
-*/
+// - RouteHook.state obsahuje plain IRouteNode, bez child props. Cely IRouteNode-tree se musi vzdy dynamicky slozit pomoci routeFromHookTree
 
-import * as React from 'react';
-import * as ReactDOM from 'react-dom';
-import { Exception, ELoginNeededException } from '../lib/common';
+// Vice viz dokumentace dispatchRoute
 
-//pouzit route na "from" hook nebo na rootHook hook.
-//export function dispatchRoute<T extends IRouteNode>(route: T, from?: RouteHook) {
-//  if (!from) from = rootHook;
-//  rootHook.dispatchRoute(route);
-//}
-
-export let rootHook: RouteHook; //root hook
-
-//start s inicialni route
-export function init<T extends IRouteNode>(startRoute: () => T) {
-  if (!startRoute) return;
-  getStartRoute = startRoute;
-  rootHook = ReactDOM.render(<RouteHook hookId={null} initStatus={getStartRoute()} />, document.getElementById('content')) as RouteHook;
-}
-export let getStartRoute: () => IRouteNode;
-
-export function routeReplaceStringProps(route: IRouteNode): IRouteNode {
-  TRouteHandler.find(route.handlerId).normalizeStringProps(route);
-  if (route.child) routeReplaceStringProps(route.child);
-  if (route.childs) for (var p in route.childs) routeReplaceStringProps(route.childs[p]);
-  return route;
-}
-
-//dekodovana URL adresa
-export interface IRouteNode {
-  handlerId: string; //handler id for route management
-  //childs routes...
-  child?: IRouteNode; //...default
-  childs?: { [hookId: string]: IRouteNode; }; //...other
-  //other route props
-  [props: string]: any;
-  //not persistent props
-  $myHook?: RouteHook; //
-}
-
-//na zaklade IRouteNode.handlerId se najde aktualni handler k IRouteNode
-//pomuze pak s RouteHook.render apod.
-export abstract class TRouteHandler {
-  constructor(public id: string) { }
-  abstract eq(node1: IRouteNode, node2: IRouteNode): boolean; 
-  abstract getComponentClass(node: IRouteNode): React.ComponentClass<IRouteNode>;
-  abstract normalizeStringProps(node: IRouteNode);
-  loginNeeded(node: IRouteNode): boolean { return false; }
-  static register(handler: TRouteHandler) { if (TRouteHandler.handlers[handler.id]) throw new Exception(handler.id); TRouteHandler.handlers[handler.id] = handler; }
-  static find(id: string): TRouteHandler { return TRouteHandler.handlers[id]; }
-  static handlers: { [id: string]: TRouteHandler; } = {};
+// modifikace hook casti component-subtree pomoci noveho route IRouteNode-subtree 
+export function dispatchRoute(route: IRouteNode, hook: RouteHook): Promise<Boolean> {
+  return new Promise<Boolean>((resolve, reject) => {
+    //vytvori modifikovany kompletni IRouteNode-tree
+    route = modifyRoute(hook, route);
+    //normalize string props and set $handler
+    prepareRoute(route);
+    if (trace) console.log(`dispatchRoute final route: ${JSON.stringify(route)}`);
+    //all modified hooks
+    let modified: Array<getModifiedResult> = []; getModified(route, rootHook, modified);
+    //all new routes
+    let newRoutes: Array<IRouteNode> = [];
+    modified.forEach(m => forEachRoutes(m.route, r => newRoutes.push(r)));
+    //login needed test
+    if (!loginHook.isLogged() && newRoutes.find(r => handler(r).loginNeeded(r))) { resolve(true); return; }
+    //all hooks, which will be unmounted
+    let oldHooks: Array<RouteHook> = []; modified.forEach(m => eachHook(m.hook, oldHooks));
+    //saveExtarnals for components, which will be unmounted
+    let saveExternals: Array<Promise<any>> = []; oldHooks.forEach(h => { let ext = h.comp.saveExternal(); if (ext) saveExternals.push(ext); });
+    //wait for all saveExternals
+    Promise.all(saveExternals).then(() => {
+      //create new components (including loadExternals)
+      let loadExternals: Array<IRouteNode> = [];
+      newRoutes.forEach(r => {
+        r.$toRender = handler(r).createComponent(r);
+        if (r.$toRender instanceof Promise) loadExternals.push(r);
+      });
+      //wait for loadExternals for newly created components
+      Promise.all(loadExternals.map(r => r.$toRender)).then(all => {
+        //get promise result
+        for (let i = 0; i < loadExternals.length; i++) loadExternals[i].$toRender = all[i];
+        //update modified hooks
+        modified.forEach(m => { m.hook.state = m.route; m.hook.forceUpdate() });
+        //clear route temporary $-props and child subroutes
+        let newHooks: Array<RouteHook> = []; eachHook(rootHook, newHooks);
+        newHooks.forEach(h => { delete h.state.$toRender; delete h.state.child; delete h.state.childs; });
+        //return;
+        resolve(false);
+      });
+    });
+  });
 }
 
-//RouteHook se posila svym childs pomoci context
-export var ContextType: React.ValidationMap<any> = {
-  parentHook: React.PropTypes.object,
-}
-export interface IContext {
-  parentHook: RouteHook;
+export function hookRoute(actHook?: RouteHook) {
+  let res: IRouteNode; if (!actHook) actHook = rootHook;
+  routeFromHookTree(actHook, val => res = val); //v res je old IRouteNode-tree
+  return res;
 }
 
-//v context je parent INode 
-export interface IHookPar extends React.Attributes {
-  hookId: string; //jakou child IRouteNode z context.parentHook provest dispatch
-  initStatus?: IRouteNode; //pokud se nenalezne IRouteNode, je sance pouzit difotni. Pouzito v ReactDOM.render k inicializaci root hook
+export interface IDispatchRouteResult { needsLogin: boolean; newRoute: IRouteNode; }
+interface getModifiedResult { route: IRouteNode, hook: RouteHook } //hook a jeho novy state v route
+
+//hook - part of component-tree is modified to newValue. Return modified route.
+function modifyRoute(hook: RouteHook, newValue: IRouteNode): IRouteNode {
+  if (hook === rootHook) return newValue;
+  let res = hookRoute();
+  //nalezni PATH k hook.parent (- seznam hookId's)
+  let parentHooks: Array<string> = [];
+  var par = hook.parent;
+  while (par.parent) { parentHooks.push(par.parent.hookId()); par = par.parent; }
+  parentHooks = parentHooks.reverse();
+  //by means of PATH find parent IRouteNode
+  let actNode = res;
+  parentHooks.forEach(hookId => actNode = hookId == 'child' ? actNode.child : actNode.childs[hookId]);
+  //bind newValue to parent
+  if (hook.hookId() == 'child') actNode.child = newValue; else actNode.childs[hook.hookId()] = newValue;
+  return res;
 }
 
-export class RouteHook extends React.Component<IHookPar, IRouteNode & React.ComponentState> {
-  constructor(props: IHookPar, ctx: IContext) {
-    super(props, ctx);
-    if (ctx && ctx.parentHook) { //zanoreny hook
-      this.parent = ctx.parentHook; //vyzobni this.props.hookId IRouteNode z parenta
-      this.state = !this.props.hookId || this.props.hookId == 'child' ? ctx.parentHook.state.child : ctx.parentHook.state.childs[this.props.hookId];
-    } else if (props.initStatus) { //neni zanoreny hook: sance pouzit initStatus
-      this.state = props.initStatus;
-    }
-  }
-  //rekurzivni dispatch na IRouteNode tree
-  dispatchRoute<T extends IRouteNode>(newRoute: T) {
-    if (this.state && this.state.handlerId == newRoute.handlerId && TRouteHandler.find(this.state.handlerId).eq(this.state, newRoute)) { //the same state => enumerate child hooks
-      if (this.state.child) this.state.child.$myHook.dispatchRoute(newRoute.child);
-      if (this.state.childs) for (let p in this.state.childs) this.state.childs[p].$myHook.dispatchRoute(newRoute.childs[p]);
-    } else { //state changed => set route to state tree and force update
-      if (this.parent) this.parent.state[this.props.hookId] = newRoute;
-      this.state = newRoute;
-      this.forceUpdate();
-    }
-  }
-  parent: RouteHook; //jsem zanoren pod jinym RouteHook
-  render(): JSX.Element {
-    if (!this.state) return null;
-    if (TRouteHandler.find(this.state.handlerId).loginNeeded(this.state)) throw new ELoginNeededException();
-    this.state.$myHook = this;
-    return React.createElement(TRouteHandler.find(this.state.handlerId).getComponentClass(this.state), this.state);
-  }
-  getChildContext(): IContext { return { parentHook: this }; }
-  static childContextTypes = ContextType;
-  static contextTypes = ContextType;
+//get IRouteNode-tree from component-tree
+function routeFromHookTree(actHook: RouteHook, setter: (copy: IRouteNode) => void) {
+  //kopie RouteHook.state
+  let val: IRouteNode = JSON.parse(JSON.stringify(actHook.state));
+  //set this copy to parent
+  setter(val);
+  //recursion
+  if (actHook.childs) actHook.childs.forEach(subHook => {
+    routeFromHookTree(subHook, subVal => {
+      //copy to parent proc
+      if (subHook.hookId() == 'child') val.child = subVal;
+      else {
+        if (!val.childs) val.childs = {};
+        val.childs[subHook.hookId()] = subVal;
+      }
+    });
+  });
 }
 
-export abstract class RouteComponent<TProp extends IRouteNode> extends React.Component<TProp, {}> { }
+//normalizuje non-string properties a naplni $handler
+function prepareRoute(route: IRouteNode) {
+  forEachRoutes(route, r => handler(r).normalizeStringProps(r));
+}
 
+function forEachRoutes(route: IRouteNode, action: (route: IRouteNode) => void) {
+  action(route);
+  if (route.child) forEachRoutes(route.child, action); if (route.childs) for (var p in route.childs) forEachRoutes(route.childs[p], action);
+}
 
+function eachHook(hook: RouteHook, res: Array<RouteHook>) { if (hook.state) res.push(hook); if (hook.childs) hook.childs.forEach(h => eachHook(h, res)); }
 
+function handler(route: IRouteNode) { return TRouteHandler.find(route.handlerId); }
+
+//rekursivni pruchod component-tree, vrati modifikovane hooks (kde RouteHandler.eq()==false)
+function getModified(route: IRouteNode, hook: RouteHook, res: Array<getModifiedResult>) {
+  if (hook.state && hook.state.handlerId == route.handlerId && handler(route).eq(hook.state, route)) { //the same route => rekurze
+    if (hook.childs)
+      hook.childs.forEach(subHook => {
+        let subRoute = subHook.hookId() == 'child' ? route.child : route.childs[subHook.hookId()];
+        getModified(subRoute, subHook, res);
+      });
+  } else //different route, stop recursion
+    res.push({ route: route, hook: hook });
+}
 

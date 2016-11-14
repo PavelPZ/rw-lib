@@ -64,8 +64,10 @@
     <TypeScriptCompile Include="login\client\index.ts" />
     <TypeScriptCompile Include="login\common.ts" />
     <TypeScriptCompile Include="navig\dispatcher.tsx" />
+    <TypeScriptCompile Include="navig\objects.tsx" />
+    <TypeScriptCompile Include="navig\test.tsx" />
     <TypeScriptCompile Include="navig\old-router-lib.ts" />
-    <TypeScriptCompile Include="navig\router.ts" />
+    <TypeScriptCompile Include="navig\router.tsx" />
     <TypeScriptCompile Include="navig\old-sitemap-router.tsx" />
     <TypeScriptCompile Include="navig\old-sitemap.ts" />
     <TypeScriptCompile Include="navig\url-parser.ts" />

@@ -1,7 +1,8 @@
 ﻿export class Exception extends Error { }
 
-export class ELoginNeededException extends Error { }
-export let onLoginNeeded: { loginNeeded?: TCallback } = {}
+export let loginHook = { doLogin: (rootHook: {}) => alert('common.ts, loginHook.doLogin: Missing code here'), isLogged: () => false };
+export let blockGuiHook = { block: (isStart: boolean) => { } };
+
 
 //http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
 //https://en.wikipedia.org/wiki/List_of_hash_functions
@@ -41,4 +42,10 @@ export type TCallback = () => void;
 //}
 
 export function noop() { }
+
+export let counter = { value: 0 };
+
+export function mergeArray<T>(arrays: Array<Array<T>>): Array<T> {
+  return [].concat.apply([], arrays);
+}
 

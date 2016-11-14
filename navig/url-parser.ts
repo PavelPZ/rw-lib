@@ -6,7 +6,7 @@
 // - ch1-hand3:  hand3 je RouteHandler.id, parent IRouteNode.childs['ch1'] urcuje child IRouteNode
 
 import { Exception } from '../lib/common';
-import { IRouteNode } from 'dispatcher';
+import { IRouteNode } from './objects';
 
 export function encodeFullUrl(st: IRouteNode): string {
   let urlStr = st ? encodeUrl(st) : null;
@@ -32,7 +32,6 @@ function decodeUrl(url?: string): IRouteNode {
 var $basicUrl = getBasicUrl(window.location.href); //cast URL pred route paramatter
 function getBasicUrl(startUrl: string): string { let idx = startUrl.toLowerCase().indexOf('.html'); return idx >= 0 ? startUrl.substr(0, idx + 5) : startUrl; }
 
-const routeHookDefaultName = 'child';
 const $isHashRouter = false;
 
 function decodeUrlLow(url: string): IRouteNode {
@@ -78,7 +77,7 @@ function decodeUrlLow(url: string): IRouteNode {
             if (!par.route.childs) par.route.childs = {};
             par.route.childs[last2.hookId] = last2.route;
           } else //child sub-route
-            par.route[routeHookDefaultName] = last2.route;
+            par.route['child'] = last2.route;
         }
         //vyndej ze stacku
         stack.splice(stack.length - 1, 1);
