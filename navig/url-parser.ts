@@ -10,7 +10,6 @@ import { IRouteNode } from './objects';
 
 export function encodeFullUrl(st: IRouteNode): string {
   let urlStr = st ? encodeUrl(st) : null;
-  //return $basicUrl + (urlStr ? ($isHashRouter ? '#' : '/') + urlStr : '');
   return $basicUrl + (urlStr ? ($isHashRouter ? '#' : '?') + urlStr : '');
 }
 
@@ -68,8 +67,7 @@ function decodeUrlLow(url: string): IRouteNode {
       case '}': //konec zanoreni
         if (stack.length == 0) break;
         let last2 = stack[stack.length - 1];
-        if (!last2.route) parseRoute(i, last2); //zpracuj sekvenci mezi {xxxx}, xxx je bez { i }
-        //let parProp = last2.hookId ? last2.hookId : routeHookDefaultName;
+        if (!last2.route) parseRoute(i, last2); //zpracuj sekvenci mezi {xxxx}, xxx je bez { } zavorek
         //navazani na parent route
         let par = stack[stack.length - 2];
         if (par) {
@@ -127,7 +125,7 @@ function getChildsPropNames(st: { [hookId: string]: IRouteNode; }): Array<string
   return props.sort();
 }
 
-export function test() {
+export function urlParserTest() {
   var url = encodeUrl({
     handlerId: 'hand1', a: '$;\\/&:', b: 2,
     child: {
@@ -157,5 +155,3 @@ export function test() {
   dump = JSON.stringify(decodeUrlLow(url), null, 2);
   debugger;
 }
-
-//test();

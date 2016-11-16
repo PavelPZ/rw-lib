@@ -16,47 +16,54 @@ import { IRouteNode, RouteHook, TRouteHandler, rootHook, TRouteComponent, trace 
 // modifikace hook casti component-subtree pomoci noveho route IRouteNode-subtree 
 export function dispatchRoute(route: IRouteNode, hook: RouteHook): Promise<Boolean> {
   return new Promise<Boolean>((resolve, reject) => {
-    //vytvori modifikovany kompletni IRouteNode-tree
-    route = modifyRoute(hook, route);
-    //normalize string props and set $handler
-    prepareRoute(route);
-    if (trace) console.log(`dispatchRoute final route: ${JSON.stringify(route)}`);
-    //all modified hooks
-    let modified: Array<getModifiedResult> = []; getModified(route, rootHook, modified);
-    //all new routes
-    let newRoutes: Array<IRouteNode> = [];
-    modified.forEach(m => forEachRoutes(m.route, r => newRoutes.push(r)));
-    //login needed test
-    if (!loginHook.isLogged() && newRoutes.find(r => handler(r).loginNeeded(r))) { resolve(true); return; }
-    //all hooks, which will be unmounted
-    let oldHooks: Array<RouteHook> = []; modified.forEach(m => eachHook(m.hook, oldHooks));
-    //saveExtarnals for components, which will be unmounted
-    let saveExternals: Array<Promise<any>> = []; oldHooks.forEach(h => { let ext = h.comp.saveExternal(); if (ext) saveExternals.push(ext); });
-    //wait for all saveExternals
-    Promise.all(saveExternals).then(() => {
-      //create new components (including loadExternals)
-      let loadExternals: Array<IRouteNode> = [];
-      newRoutes.forEach(r => {
-        r.$toRender = handler(r).createComponent(r);
-        if (r.$toRender instanceof Promise) loadExternals.push(r);
+    try {
+      //vytvori modifikovany kompletni IRouteNode-tree
+      route = modifyRoute(hook, route);
+      //normalize string props and set $handler
+      prepareRoute(route);
+      if (trace) console.log(`dispatchRoute final route: ${JSON.stringify(route)}`);
+      //all modified hooks
+      let modified: Array<getModifiedResult> = []; getModified(route, rootHook, modified);
+      //all new routes
+      let newRoutes: Array<IRouteNode> = [];
+      modified.forEach(m => forEachRoutes(m.route, r => newRoutes.push(r)));
+      //login needed test
+      if (!loginHook.isLogged() && newRoutes.find(r => handler(r).loginNeeded(r))) { resolve(true); return; }
+      //all hooks, which will be unmounted
+      let oldHooks: Array<RouteHook> = []; modified.forEach(m => eachHook(m.hook, oldHooks));
+      //saveExtarnals for components, which will be unmounted
+      let saveExternals: Array<Promise<any>> = []; oldHooks.forEach(h => { let ext = h.comp.saveExternal(); if (ext) saveExternals.push(ext); });
+      //wait for all saveExternals
+      Promise.all(saveExternals).catch(err => reject(err)).then(() => {
+        try {
+          //create new components (including loadExternals)
+          let loadExternals: Array<IRouteNode> = [];
+          newRoutes.forEach(r => {
+            r.$toRender = handler(r).createComponent(r);
+            if (r.$toRender instanceof Promise) loadExternals.push(r);
+          });
+          //wait for loadExternals for newly created components
+          Promise.all(loadExternals.map(r => r.$toRender)).catch(err => reject(err)).then(all => {
+            try {
+              //get promise result
+              for (let i = 0; i < loadExternals.length; i++) loadExternals[i].$toRender = all[i];
+              //update modified hooks
+              modified.forEach(m => { m.hook.state = m.route; m.hook.forceUpdate() });
+              //clear route temporary $-props and child sunroutes
+              let newHooks: Array<RouteHook> = []; eachHook(rootHook, newHooks);
+              newHooks.forEach(h => { delete h.state.$toRender; delete h.state.child; delete h.state.childs; });
+              //return;
+              resolve(false);
+            } catch (err) { reject(err) }
+          });
+        } catch (err) { reject(err) }
       });
-      //wait for loadExternals for newly created components
-      Promise.all(loadExternals.map(r => r.$toRender)).then(all => {
-        //get promise result
-        for (let i = 0; i < loadExternals.length; i++) loadExternals[i].$toRender = all[i];
-        //update modified hooks
-        modified.forEach(m => { m.hook.state = m.route; m.hook.forceUpdate() });
-        //clear route temporary $-props and child subroutes
-        let newHooks: Array<RouteHook> = []; eachHook(rootHook, newHooks);
-        newHooks.forEach(h => { delete h.state.$toRender; delete h.state.child; delete h.state.childs; });
-        //return;
-        resolve(false);
-      });
-    });
+    } catch (err) { reject(err) }
   });
 }
 
-export function hookRoute(actHook?: RouteHook) {
+//IRouteNode-tree
+export function hookRoute(actHook?: RouteHook): IRouteNode {
   let res: IRouteNode; if (!actHook) actHook = rootHook;
   routeFromHookTree(actHook, val => res = val); //v res je old IRouteNode-tree
   return res;
@@ -65,7 +72,7 @@ export function hookRoute(actHook?: RouteHook) {
 export interface IDispatchRouteResult { needsLogin: boolean; newRoute: IRouteNode; }
 interface getModifiedResult { route: IRouteNode, hook: RouteHook } //hook a jeho novy state v route
 
-//hook - part of component-tree is modified to newValue. Return modified route.
+//part of component-tree is modified to newValue IRouteNode. Return celou modified route.
 function modifyRoute(hook: RouteHook, newValue: IRouteNode): IRouteNode {
   if (hook === rootHook) return newValue;
   let res = hookRoute();
@@ -101,16 +108,15 @@ function routeFromHookTree(actHook: RouteHook, setter: (copy: IRouteNode) => voi
   });
 }
 
-//normalizuje non-string properties a naplni $handler
-function prepareRoute(route: IRouteNode) {
-  forEachRoutes(route, r => handler(r).normalizeStringProps(r));
-}
+//normalizuje non-string properties
+function prepareRoute(route: IRouteNode) { forEachRoutes(route, r => handler(r).normalizeStringProps(r)); }
 
 function forEachRoutes(route: IRouteNode, action: (route: IRouteNode) => void) {
   action(route);
   if (route.child) forEachRoutes(route.child, action); if (route.childs) for (var p in route.childs) forEachRoutes(route.childs[p], action);
 }
 
+//vrati vsechny Hooks z hook component-subtree
 function eachHook(hook: RouteHook, res: Array<RouteHook>) { if (hook.state) res.push(hook); if (hook.childs) hook.childs.forEach(h => eachHook(h, res)); }
 
 function handler(route: IRouteNode) { return TRouteHandler.find(route.handlerId); }

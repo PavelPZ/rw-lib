@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import { IRouteNode, rootHook, RouteHook } from './objects';
 import { dispatchRoute, hookRoute } from './dispatcher';
 import { decodeFullUrl, encodeFullUrl } from './url-parser';
-import { Exception, loginHook, blockGuiHook } from '../lib/common';
+import { Exception, loginHook, blockGuiHook, exceptionHook } from '../lib/common';
 
 //navigate na route
 export function navigate<T extends IRouteNode>(routes: T, ev?: React.SyntheticEvent, hook?: RouteHook) { if (ev) ev.preventDefault(); return rootRouteBind(adjustRoute(routes), true, hook); }
@@ -40,6 +40,6 @@ function rootRouteBind(route: IRouteNode, withPustState: boolean, hook?: RouteHo
     blockGuiHook.block(false);
     if (needsLogin) loginHook.doLogin(hookRoute());
     else if (withPustState) pushState(hookRoute());
-  })
+  }).catch(err => exceptionHook.onError(err));
 }
 

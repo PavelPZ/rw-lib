@@ -1,5 +1,5 @@
 ﻿import * as React from 'react';
-import { Exception } from '../lib/common';
+import { Exception, IRouteNodeCommon } from '../lib/common';
 
 export abstract class TRouteHandler {
   constructor(public id: string) { }
@@ -18,15 +18,11 @@ export type TCreateComponentResult = JSX.Element | Promise<JSX.Element>;
 export const trace = true;
 
 //dekodovana URL adresa
-export interface IRouteNode {
-  handlerId: string; //handler id for route management
+export interface IRouteNode extends IRouteNodeCommon {
   //childs routes...
   child?: IRouteNode; //...default
   childs?: { [hookId: string]: IRouteNode; }; //...other
-  //other route props
-  [props: string]: any;
   //not persistent props
-  $handler?: TRouteHandler;
   $toRender?: TCreateComponentResult; //TRouteHandler.createComponent vraci promise - jeji vysledek
 }
 
@@ -83,7 +79,7 @@ export abstract class RouteComponent<T,P> extends React.Component<T, P> {
   constructor(props, ctx: IContext) {
     super(props, ctx);
     //child - parent
-    this.parent = ctx.parentHook; //vyzobni this.props.hookId IRouteNode z parenta
+    this.parent = ctx.parentHook; 
     this.parent.comp = this;
   }
   parent: RouteHook; //jsem zanoren pod jinym RouteHook

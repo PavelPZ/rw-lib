@@ -1,7 +1,17 @@
 ﻿export class Exception extends Error { }
 
-export let loginHook = { doLogin: (rootHook: {}) => alert('common.ts, loginHook.doLogin: Missing code here'), isLogged: () => false };
+export interface IRouteNodeCommon {
+  handlerId: string; //handler id for route management
+  //childs routes...
+  child?: IRouteNodeCommon; //...default
+  childs?: { [hookId: string]: IRouteNodeCommon; }; //...other
+  //other route props
+  [props: string]: any;
+}
+
+export let loginHook = { doLogin: (rootHook: IRouteNodeCommon) => alert('common.ts, loginHook.doLogin: Missing code here'), isLogged: () => false }; 
 export let blockGuiHook = { block: (isStart: boolean) => { } };
+export let exceptionHook = { onError: (err) => { } };
 
 
 //http://stackoverflow.com/questions/7616461/generate-a-hash-from-string-in-javascript-jquery
