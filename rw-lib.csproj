@@ -23,9 +23,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include=".gitignore" />
-    <Content Include="glob\cs.js" />
-    <Content Include="glob\de.js" />
-    <Content Include="glob\en.js" />
+    <Content Include="glob\locale-data\cs.js" />
+    <Content Include="glob\locale-data\en.js" />
     <Content Include="index.html" />
     <Content Include="jspm.browser.js" />
     <Content Include="jspm.config.js" />
@@ -46,7 +45,6 @@
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="glob\all-langs.ts" />
-    <TypeScriptCompile Include="glob\all-locs.ts" />
     <TypeScriptCompile Include="glob\formaters.ts" />
     <TypeScriptCompile Include="glob\globalize.ts" />
     <TypeScriptCompile Include="index.ts" />

@@ -1,20 +1,49 @@
-﻿import { formaterFncs, IFormaterFncs, IFormater, TAllLangs } from './formaters';
+﻿import { formaterFncs, IFormaterFncs, IFormater } from './formaters';
+import { LangType } from './all-langs'
+import * as cookie from '../lib/cookie'
 import Globalize from "globalize-runtime";
+//import 'rw-lib/glob/locale-data/en'
 
-//************* Runtime pro globalizaci
-//allLocs(); //volana pouze jednou pri startu aplikace
-//globalizeInit('cs'); //definice jazyka lokalizace, volano pri startu aplikace (difotni jazyk) a pro zmene lokalizace
-//globalize.dateFull(new Date()); //pouziti formateru
 //*************
+const actLangCookieName = 'act-lang';
 
-//seznam predkompilovanych formatovacich funkci
+//globalize initialization for default lang (extracted from cookie or navigator)
+export function globalizeInit(): Promise<IFormater> {
+  return initLocale(initLang());
+}
+
+//seznam predkompilovanych formatovacich funkci pro aktualni jazyk
 export let globalize: IFormater;
 
-//inicializace jazyka lokalizace
-export function globalizeInit(loc: TAllLangs) {
-  if (actLoc == loc) return;
-  let glob = new Globalize(loc); actLoc = loc;
-  globalize = {} as any;
-  for (var p in formaterFncs) globalize[p] = formaterFncs[p](glob); //priprav funkce
+//change globalize lang. 
+export function initLocale(loc: LangType, withSaveToGlobal: boolean = true): Promise<IFormater> {
+  return new Promise<IFormater>((resolve, reject) => {
+    if (globalize && globalize.locale == loc) resolve(globalize);
+    System.import(`rw-lib/glob/locale-data/${loc}`).then(m => {
+      let glob = new Globalize(loc);
+      let res: IFormater = { locale: loc } as any;
+      for (var p in formaterFncs) res[p] = formaterFncs[p](glob); //priprav funkce
+      if (withSaveToGlobal) {
+        cookie.write(actLangCookieName, loc, true);
+        globalize = res;
+      }
+      resolve(res);
+    })
+  });
 }
-let actLoc: string;
+
+//get default lang
+export function initLang(): LangType {
+  let actLang = cookie.read(actLangCookieName) as LangType;
+  if (actLang) return actLang;
+  const navigEx = navigator as any as navigatorEx;
+  actLang = <LangType>((navigEx.languages && navigEx.languages[0]) || navigEx.language || navigEx.userLanguage);
+  return actLang.toLowerCase().split(/[_-]+/)[0] as LangType;
+}
+
+//navigator overload
+interface navigatorEx {
+  languages: Array<string>;
+  userLanguage: string;
+  language: string;
+}

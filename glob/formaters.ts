@@ -1,4 +1,5 @@
-﻿//************* eviduje formaters is a parametry.
+﻿import { LangType } from './all-langs'
+//************* eviduje formaters is a parametry.
 //Vyuzito v designtime pro generaci zkompilovanych formatovacich funkci (d:\rw\rw-lib\glob\*.js) i v runtime pro vlastni formatovani (v d:\rw\rw-lib\glob\globalize.ts)
 
 //Moznosti: https://www.sitepoint.com/how-to-implement-internationalization-i18n-in-javascript/
@@ -10,10 +11,6 @@ export type getFormatterFnc = (glob: GlobalizeStatic) => FormatterOrParserFuncti
 export type dateFormatter = (value: Date) => string;
 export type relativeTimeFormatter = (value: number) => string;
 export type numberFormatter = (value: number) => string;
-
-export type TAllLangs = 'cs' | 'de' | 'en';
-export var allLangs = ['cs', 'de', 'en'];
-//export var allLangs = ['de', 'en'];
 
 export interface IFormaterFncs {
   dateFull: getFormatterFnc;
@@ -44,6 +41,7 @@ export interface IFormaterFncs {
 }
 
 export interface IFormater {
+  locale: LangType; 
   dateFull: dateFormatter;
   dateLong: dateFormatter;
   dateMedium: dateFormatter;
